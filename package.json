@@ -1,0 +1,41 @@
+{
+  "name": "astro-tips",
+  "version": "1.1.0",
+  "description": "An Astro integration for creating beautiful notice and tip blocks in Markdown",
+  "license": "MIT",
+  "author": "xingwangzhe",
+  "type": "module",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./styles": "./styles/tips.css"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "src",
+    "styles"
+  ],
+  "keywords": [
+    "astro",
+    "astro-integration",
+    "tips",
+    "markdown",
+    "notice",
+    "alert"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "hastscript": "^7.0.0",
+    "unist-util-visit": "^4.0.0"
+  },
+  "peerDependencies": {
+    "astro": "^2.0.0 || ^3.0.0 || ^4.0.0"
+  }
+}
