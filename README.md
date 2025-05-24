@@ -1,3 +1,5 @@
+
+移植自 [hexo-tips](https://github.com/xingwangzhe/hexo-tips)
 # Astro Tips 使用指南
 
 `astro-tips` 是一个 Astro 集成，它让你可以在 Markdown 和 MDX 文件中轻松创建美观的提示框。

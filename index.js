@@ -152,7 +152,7 @@ const defaultConfig = {
   }
 };
 
-// 使用 remark 插件处理提示框语法 - 简化版本，避免复杂的AST操作
+// 使用 remark 插件处理提示框语法 - 完全重写以正确处理多行内容
 function remarkTips(options = {}) {
   // 合并默认配置和用户配置
   const tipsConfig = { ...defaultConfig, ...options };
@@ -160,61 +160,198 @@ function remarkTips(options = {}) {
   return function transformer(tree) {
     console.log('🔍 Astro-Tips - 开始处理 Markdown 文件');
     
-    // 递归遍历AST寻找提示框模式
-    function visit(node, parent, index) {
-      // 只处理段落节点
-      if (node.type === 'paragraph' && node.children && node.children.length > 0) {
-        // 获取段落的文本内容
-        const textContent = node.children
-          .filter(child => child.type === 'text')
-          .map(child => child.value)
-          .join('');
-        
-        // 检查是否包含提示框语法
-        const tipMatch = textContent.match(/:::\s*(\w+)\s*([\s\S]*?):::/);
-        if (tipMatch) {
-          const type = tipMatch[1];
-          const content = tipMatch[2].trim();
-          
-          // 检查是否是支持的类型
-          if (!tipsConfig[type]) {
-            console.log(`❌ Astro-Tips - 不支持的类型: ${type}`);
-            return;
-          }
-          
-          console.log(`✅ Astro-Tips - 处理 ${type} 类型的提示框`);
-          
-          const icon = tipsConfig[type].icon;
-          
-          // 简单处理内容 - 保持原始内容，让浏览器处理
-          let processedContent = content;
-          
-          // 创建 HTML 节点
-          const htmlNode = {
-            type: 'html',
-            value: `<div class="astro-tips-layout astro-tips-${type} tips-style-${type}">
-  <div class="icon">${icon}</div>
-  <div class="content">${processedContent}</div>
-</div>`
-          };
-          
-          // 替换当前节点
-          if (parent && typeof index !== 'undefined') {
-            parent.children[index] = htmlNode;
-            return;
-          }
-        }
+    // 首先将整个文档转换为文本进行预处理
+    function nodeToText(node) {
+      if (node.type === 'text') {
+        return node.value;
       }
-      
-      // 递归处理子节点
       if (node.children) {
-        for (let i = 0; i < node.children.length; i++) {
-          visit(node.children[i], node, i);
+        return node.children.map(nodeToText).join('');
+      }
+      return '';
+    }
+    
+    // 收集所有段落的文本内容
+    function collectAllText(tree) {
+      const parts = [];
+      tree.children.forEach(node => {
+        if (node.type === 'paragraph') {
+          parts.push(nodeToText(node));
+        } else if (node.type === 'code') {
+          parts.push('```' + (node.lang || '') + '\n' + node.value + '\n```');
+        } else if (node.type === 'list') {
+          // 处理列表
+          const listText = node.children.map(item => {
+            return '- ' + nodeToText(item);
+          }).join('\n');
+          parts.push(listText);
+        } else if (node.type === 'heading') {
+          parts.push('#'.repeat(node.depth) + ' ' + nodeToText(node));
+        } else {
+          parts.push(nodeToText(node));
         }
+      });
+      return parts.join('\n\n');
+    }
+    
+    const fullText = collectAllText(tree);
+    
+    // 使用正则表达式匹配所有提示框
+    const tipRegex = /:::\s*(\w+)\s*([\s\S]*?):::/g;
+    let match;
+    const tips = [];
+    
+    while ((match = tipRegex.exec(fullText)) !== null) {
+      const type = match[1];
+      const content = match[2].trim();
+      
+      if (tipsConfig[type]) {
+        tips.push({
+          type,
+          content,
+          fullMatch: match[0],
+          start: match.index,
+          end: match.index + match[0].length
+        });
+        console.log(`✅ Astro-Tips - 找到 ${type} 类型的提示框`);
       }
     }
     
-    visit(tree);
+    if (tips.length === 0) {
+      return tree;
+    }
+      // 重建树结构，替换找到的提示框
+    const newChildren = [];
+    
+    // 将文本按提示框分割
+    let currentPos = 0;
+    
+    tips.forEach(tip => {
+      // 添加提示框之前的内容
+      if (tip.start > currentPos) {
+        const beforeText = fullText.substring(currentPos, tip.start).trim();
+        if (beforeText) {
+          // 将普通文本转换回段落节点
+          beforeText.split('\n\n').forEach(paragraph => {
+            if (paragraph.trim()) {
+              if (paragraph.startsWith('#')) {
+                // 标题处理
+                const level = paragraph.match(/^#+/)[0].length;
+                const title = paragraph.replace(/^#+\s*/, '');
+                newChildren.push({
+                  type: 'heading',
+                  depth: level,
+                  children: [{ type: 'text', value: title }]
+                });
+              } else if (paragraph.startsWith('```')) {
+                // 代码块处理
+                const lines = paragraph.split('\n');
+                const lang = lines[0].replace('```', '');
+                const code = lines.slice(1, -1).join('\n');
+                newChildren.push({
+                  type: 'code',
+                  lang: lang || null,
+                  value: code
+                });
+              } else {
+                // 普通段落
+                newChildren.push({
+                  type: 'paragraph',
+                  children: [{ type: 'text', value: paragraph.trim() }]
+                });
+              }
+            }
+          });
+        }
+      }
+      
+      // 添加提示框
+      const icon = tipsConfig[tip.type].icon;
+      
+      newChildren.push({
+        type: 'html',
+        value: `<div class="astro-tips-layout astro-tips-${tip.type} tips-style-${tip.type}">
+  <div class="icon">${icon}</div>
+  <div class="content">`
+      });
+      
+      // 处理提示框内容
+      if (tip.content.trim()) {
+        tip.content.split('\n\n').forEach(paragraph => {
+          if (paragraph.trim()) {
+            if (paragraph.startsWith('```')) {
+              // 代码块处理
+              const lines = paragraph.split('\n');
+              const lang = lines[0].replace('```', '');
+              const code = lines.slice(1, -1).join('\n');
+              newChildren.push({
+                type: 'code',
+                lang: lang || null,
+                value: code
+              });
+            } else if (paragraph.includes('- ')) {
+              // 列表处理
+              const items = paragraph.split('\n').filter(line => line.trim().startsWith('- '));
+              newChildren.push({
+                type: 'list',
+                ordered: false,
+                children: items.map(item => ({
+                  type: 'listItem',
+                  children: [{
+                    type: 'paragraph',
+                    children: [{ type: 'text', value: item.replace(/^-\s*/, '') }]
+                  }]
+                }))
+              });
+            } else {
+              // 普通段落
+              newChildren.push({
+                type: 'paragraph',
+                children: [{ type: 'text', value: paragraph.trim() }]
+              });
+            }
+          }
+        });
+      }
+      
+      newChildren.push({
+        type: 'html',
+        value: `  </div>
+</div>`
+      });
+      
+      currentPos = tip.end;
+    });
+    
+    // 添加最后剩余的内容
+    if (currentPos < fullText.length) {
+      const afterText = fullText.substring(currentPos).trim();
+      if (afterText) {
+        afterText.split('\n\n').forEach(paragraph => {
+          if (paragraph.trim()) {
+            if (paragraph.startsWith('#')) {
+              // 标题处理
+              const level = paragraph.match(/^#+/)[0].length;
+              const title = paragraph.replace(/^#+\s*/, '');
+              newChildren.push({
+                type: 'heading',
+                depth: level,
+                children: [{ type: 'text', value: title }]
+              });
+            } else {
+              // 普通段落
+              newChildren.push({
+                type: 'paragraph',
+                children: [{ type: 'text', value: paragraph.trim() }]
+              });
+            }
+          }
+        });
+      }
+    }
+    
+    // 替换整个子节点数组
+    tree.children = newChildren;
     return tree;
   };
 }
