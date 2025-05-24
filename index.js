@@ -158,7 +158,7 @@ function remarkTips(options = {}) {
   const tipsConfig = { ...defaultConfig, ...options };
   
   return function transformer(tree) {
-    console.log('🔍 Astro-Tips - 开始处理 Markdown 文件');
+   // console.log('🔍 Astro-Tips - 开始处理 Markdown 文件');
     
     // 首先将整个文档转换为文本进行预处理
     function nodeToText(node) {
@@ -213,7 +213,7 @@ function remarkTips(options = {}) {
           start: match.index,
           end: match.index + match[0].length
         });
-        console.log(`✅ Astro-Tips - 找到 ${type} 类型的提示框`);
+        //console.log(`✅ Astro-Tips - 找到 ${type} 类型的提示框`);
       }
     }
     
@@ -363,11 +363,11 @@ export default function (options = {}) {
       'astro:config:setup': ({ updateConfig, injectScript }) => {
         // 合并默认配置和用户配置
         const tipsConfig = { ...defaultConfig, ...options };
-        console.log('🔧 Astro-Tips - 配置加载:', Object.keys(tipsConfig).length, '种类型');
+        //console.log('🔧 Astro-Tips - 配置加载:', Object.keys(tipsConfig).length, '种类型');
         
         // 读取基础 CSS
         let cssContent = fs.readFileSync(resolve(__dirname, 'styles/tips.css'), 'utf8');
-        console.log('🎨 Astro-Tips - CSS 样式已加载');
+        //console.log('🎨 Astro-Tips - CSS 样式已加载');
         
         // 动态生成样式规则
         Object.keys(tipsConfig).forEach(type => {
@@ -399,7 +399,7 @@ export default function (options = {}) {
           }
         });
         
-        console.log('🚀 Astro-Tips - 集成完成，已配置 remarkPlugins 和样式注入');
+        //console.log('🚀 Astro-Tips - 集成完成，已配置 remarkPlugins 和样式注入');
       }
     }
   };
