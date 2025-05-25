@@ -1,6 +1,6 @@
 {
   "name": "astro-tips",
-  "version": "1.1.6",
+  "version": "1.2.0",
   "description": "🎨 Beautiful, customizable tip and notice blocks for Astro - 16 built-in styles with auto dark mode support and built-in compression",
   "license": "MIT",
   "author": "xingwangzhe",
@@ -23,6 +23,7 @@
   "keywords": [
     "astro",
     "astro-integration",
+    "astro-component",
     "tips",
     "tip-blocks",
     "callouts",
@@ -36,7 +37,9 @@
     "light-mode",
     "ui-components",
     "documentation",
-    "content-creation"
+    "content-creation",
+    "remark",
+    "remark-plugin"
   ],  "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "echo \"Building astro-tips...\" && npm run validate",
@@ -63,5 +66,8 @@
   "homepage": "https://github.com/xingwangzhe/astro-tips",
   "bugs": {
     "url": "https://github.com/xingwangzhe/astro-tips/issues"
+  },
+  "engines": {
+    "node": ">=18.14.1"
   }
 }
