@@ -70,28 +70,28 @@
 }
 
 /* 主题样式规则 */
-[class^="astro-tips-"] {
+.astro-tips-layout {
     border-color: var(--tips-border);
 }
 
-[class^="astro-tips-"] .icon {
+.astro-tips-layout .icon {
     color: var(--tips-border);
 }
 
 /* 1. 手动暗色模式优先 */
-html.dark [class^="astro-tips-"] {
+html.dark .astro-tips-layout {
     background-color: var(--tips-dark-bg);
 }
 
 /* 2. 系统暗色模式其次 */
 @media (prefers-color-scheme: dark) {
-    html:not(.light) [class^="astro-tips-"] {
+    html:not(.light) .astro-tips-layout {
         background-color: var(--tips-dark-bg);
     }
 }
 
 /* 3. 亮色模式最后 */
-html:not(.dark) [class^="astro-tips-"],
-html.light [class^="astro-tips-"] {
+html:not(.dark) .astro-tips-layout,
+html.light .astro-tips-layout {
     background-color: var(--tips-light-bg);
 }

@@ -234,24 +234,22 @@ function astroTips(options = {}) {
         
         // 添加文件监听，开发时CSS文件变化会触发重新构建
         addWatchFile(cssFilePath);
-        
-        // 动态生成每种类型的颜色变量 - 学习hexo-tips的方式
+          // 动态生成每种类型的颜色变量 - 学习hexo-tips的方式
         Object.keys(tipsConfig).forEach(type => {
           const style = tipsConfig[type].style || {};
           const styleRules = `
-.tips-style-${type} {
+.astro-tips-${type}.tips-style-${type} {
   --tips-light-bg: ${style.light?.background || '#fff'};
   --tips-dark-bg: ${style.dark?.background || '#333'};
   --tips-border: ${style.border || '#000'};
 }`;
           cssContent += styleRules;
-        });
-          // 最小必要性CSS注入 - 模仿hexo-tips的injector方式
+        });// 最小必要性CSS注入 - 使用 head-inline 而不是 page
         injectScript('head-inline', `
 if (!document.getElementById('astro-tips-styles')) {
   const style = document.createElement('style');
   style.id = 'astro-tips-styles';
-  style.textContent = ${JSON.stringify(cssContent)};
+  style.textContent = \`${cssContent.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`;
   document.head.appendChild(style);
 }`);
         
