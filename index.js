@@ -6,54 +6,7 @@ import { visit } from 'unist-util-visit';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-/**
- * 简单的CSS压缩函数 - 移除不必要的空白和注释
- * @param {string} css - 要压缩的CSS字符串
- * @returns {string} 压缩后的CSS
- */
-function minifyCSS(css) {
-  return css
-    // 移除注释
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    // 移除多余的空白字符（但保留换行符前后的空格）
-    .replace(/\s+/g, ' ')
-    // 移除不必要的空格
-    .replace(/\s*{\s*/g, '{')
-    .replace(/\s*}\s*/g, '}')
-    .replace(/\s*;\s*/g, ';')
-    .replace(/\s*:\s*/g, ':')
-    .replace(/\s*,\s*/g, ',')
-    // 移除开头和结尾的空白
-    .trim();
-}
-
-/**
- * 简单的JavaScript压缩函数 - 移除不必要的空白和注释
- * @param {string} js - 要压缩的JavaScript字符串
- * @returns {string} 压缩后的JavaScript
- */
-function minifyJS(js) {
-  return js
-    // 移除单行注释（但保留在字符串中的）
-    .replace(/\/\/.*$/gm, '')
-    // 移除多行注释
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    // 移除多余的空白字符
-    .replace(/\s+/g, ' ')
-    // 移除不必要的空格
-    .replace(/\s*{\s*/g, '{')
-    .replace(/\s*}\s*/g, '}')
-    .replace(/\s*;\s*/g, ';')
-    .replace(/\s*=\s*/g, '=')
-    .replace(/\s*\(\s*/g, '(')
-    .replace(/\s*\)\s*/g, ')')
-    .replace(/\s*,\s*/g, ',')
-    .replace(/\s*\.\s*/g, '.')
-    // 移除开头和结尾的空白
-    .trim();
-}
-
-// 支持的 tip 类型
+// 支持的 tip 类型 - 从 defaultConfig 动态生成
 const TIP_VARIANTS = new Set([
   'warning', 'danger', 'tip', 'mention', 'recommend', 'note', 
   'info', 'success', 'error', 'bug', 'quote', 'important', 
@@ -67,7 +20,7 @@ function isTipVariant(variant) {
 // 生成 mdast 节点的辅助函数
 function createTipNode(type, attrs = {}, children = []) {
   return {
-    type: 'paragraph',
+    type: type,
     data: {
       hName: type,
       hProperties: attrs
@@ -217,7 +170,7 @@ function isDirective(node) {
   );
 }
 
-// 基于 AST 的 remark 插件处理提示框语法（仿照 Starlight asides）
+// 基于 AST 的 remark 插件处理提示框语法
 function remarkTips(options = {}) {
   const tipsConfig = { ...defaultConfig, ...options };
   
@@ -241,7 +194,7 @@ function remarkTips(options = {}) {
       if (!config) {
         return;
       }
-        // 创建提示框 HTML 结构（无标题，与原始 hexo-tips 保持一致）
+        // 创建提示框 HTML 结构
       const tipBox = createTipNode(
         'div',
         {
@@ -251,12 +204,12 @@ function remarkTips(options = {}) {
         [
           createTipNode(
             'div',
-            { class: 'astro-tips-icon' },
+            { class: 'icon' },
             [{ type: 'text', value: config.icon }]
           ),
           createTipNode(
             'div',
-            { class: 'astro-tips-content' },
+            { class: 'content' },
             node.children
           )
         ]
@@ -267,45 +220,42 @@ function remarkTips(options = {}) {
   };
 }
 
-export default function (options = {}) {
+function astroTips(options = {}) {
   return {
     name: 'astro-tips',
     hooks: {
-      'astro:config:setup': ({ updateConfig, injectScript }) => {
+      'astro:config:setup': ({ updateConfig, addWatchFile, injectScript }) => {
         // 合并默认配置和用户配置
         const tipsConfig = { ...defaultConfig, ...options };
-          // 读取基础 CSS
-        let cssContent = fs.readFileSync(resolve(__dirname, 'styles/tips.css'), 'utf8');
-          // 动态生成每种类型的颜色变量
+        
+        // 读取基础 CSS 文件
+        const cssFilePath = resolve(__dirname, 'styles/tips.css');
+        let cssContent = fs.readFileSync(cssFilePath, 'utf8');
+        
+        // 添加文件监听，开发时CSS文件变化会触发重新构建
+        addWatchFile(cssFilePath);
+        
+        // 动态生成每种类型的颜色变量 - 学习hexo-tips的方式
         Object.keys(tipsConfig).forEach(type => {
           const style = tipsConfig[type].style || {};
           const styleRules = `
 .tips-style-${type} {
-    --tips-light-bg: ${style.light?.background || '#fff'};
-    --tips-dark-bg: ${style.dark?.background || '#333'};
-    --tips-border: ${style.border || '#000'};
+  --tips-light-bg: ${style.light?.background || '#fff'};
+  --tips-dark-bg: ${style.dark?.background || '#333'};
+  --tips-border: ${style.border || '#000'};
 }`;
           cssContent += styleRules;
         });
-          // 压缩CSS内容以优化性能
-        const minifiedCSS = minifyCSS(cssContent);
+          // 最小必要性CSS注入 - 模仿hexo-tips的injector方式
+        injectScript('head-inline', `
+if (!document.getElementById('astro-tips-styles')) {
+  const style = document.createElement('style');
+  style.id = 'astro-tips-styles';
+  style.textContent = ${JSON.stringify(cssContent)};
+  document.head.appendChild(style);
+}`);
         
-        // 创建并压缩JavaScript注入代码
-        const injectJS = `
-          if (!document.getElementById('astro-tips-styles')) {
-            const style = document.createElement('style');
-            style.id = 'astro-tips-styles';
-            style.textContent = \`${minifiedCSS.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`;
-            document.head.appendChild(style);
-          }
-        `;
-        
-        const minifiedJS = minifyJS(injectJS);
-        
-        // 使用 injectScript 在页面头部注入压缩后的样式
-        injectScript('head-inline', minifiedJS);
-        
-        // 配置 markdown 处理 - 使用 remarkDirective 和我们的插件
+        // 配置 markdown 处理
         updateConfig({
           markdown: {
             remarkPlugins: [
@@ -318,3 +268,5 @@ export default function (options = {}) {
     }
   };
 }
+
+export default astroTips;
