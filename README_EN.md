@@ -1,17 +1,16 @@
 [中文](README.md)
 # 🎨 Astro Tips - Beautiful Tip Blocks Integration
 
-> 🌟 Ported from [hexo-tips](https://github.com/xingwangzhe/hexo-tips), optimized for the Astro ecosystem
+> 🌟 Beautiful tip blocks for the Astro ecosystem
 
-**Make your content more engaging!** `astro-tips` is an easy-to-use Astro integration that creates 18 beautiful tip blocks in Markdown and MDX files with just a few lines of code.
+**Make your content more engaging!** `astro-tips` is an easy-to-use Astro integration that creates 16 beautiful tip blocks in Markdown and MDX files with just a few lines of code.
 
 ✨ **Key Features**
 - 🚀 Zero configuration, works out of the box
-- 🎨 18 built-in tip block types covering all use cases
+- 🎨 16 built-in tip block types covering all use cases
 - 🌙 Auto light/dark theme adaptation
 - 📝 Full Markdown syntax compatibility
-- ⚡ Lightweight, no performance impact
-- 🎯 Perfect TypeScript support
+- ✨ Simple and intuitive usage
 
 ## 📦 Quick Installation
 
@@ -39,10 +38,10 @@ Add the integration to your `astro.config.mjs` file and enjoy zero-configuration
 
 ```js
 import { defineConfig } from 'astro/config';
-import tips from 'astro-tips';
+import astroTips from 'astro-tips';
 
 export default defineConfig({
-  integrations: [tips()], // That's it!
+  integrations: [astroTips()], // That's it!
 });
 ```
 
@@ -52,11 +51,11 @@ If you want to customize styles or add your own tip block types:
 
 ```js
 import { defineConfig } from 'astro/config';
-import tips from 'astro-tips';
+import astroTips from 'astro-tips';
 
 export default defineConfig({
   integrations: [
-    tips({
+    astroTips({
       // Customize existing type styles
       info: {
         icon: 'ℹ️', // Custom icon
@@ -113,37 +112,33 @@ console.log('Hello, Astro Tips!');
 
 ![Tip Block Example](show.webp)
 
-## 🎨 18 Built-in Styles
+## 🎨 16 Built-in Styles
 
-We've carefully designed 18 tip blocks to meet various use cases:
+We've carefully designed 16 tip blocks to meet various use cases:
 
-### 📝 Content Creation
-- `info` ℹ️ - Important information
-- `note` 📝 - Study notes
-- `quote` 💭 - Quoted content
-- `example` 🔍 - Code examples
+### 📝 Basic Types
+- `tip` 💡 - Practical tips and advice
+- `note` 📝 - Important notes
+- `info` ℹ️ - General information
+- `warning` ⚠️ - Warning notifications
 
-### ⚠️ Status Alerts  
-- `success` ✅ - Success messages
-- `warning` ⚠️ - Warnings
-- `error` ❌ - Error alerts
+### 🚨 Status Alerts  
+- `success` ✅ - Success feedback
+- `error` ❌ - Error messages
 - `danger` ⛔ - Danger warnings
+- `caution` 🔻 - Caution reminders
 
-### 💡 Tips & Tricks
-- `tip` 💡 - Practical tips
+### 💡 Special Purpose
 - `recommend` 👍 - Recommendations
-- `star` ⭐ - Highlights
-- `update` 🔄 - Updates
+- `important` ⭐ - Important emphasis
+- `example` 🔍 - Examples and demonstrations
+- `question` ❓ - Questions
 
-### 🔧 Development
-- `code` 💻 - Code explanations
-- `bug` 🐛 - Bug alerts
-- `todo` 📋 - Todo items
-- `link` 🔗 - External links
-
-### 🕐 Others
-- `time` ⌛ - Time reminders
+### 🎯 Other Types
+- `answer` ✨ - Question answers
+- `quote` 💭 - Quoted content
 - `mention` 💬 - Special mentions
+- `bug` 🐛 - Bug related tips
 
 ## ✨ Smart Theme Adaptation
 
@@ -153,6 +148,59 @@ No configuration needed - tip blocks intelligently adapt to your website theme:
 - 🌞 User prefers light mode → Use light tip blocks
 - 🌙 User prefers dark mode → Use dark tip blocks  
 - 💻 Follow system settings → Smart switching
+
+## 🧩 Common Use Cases
+
+### In Blog Posts
+
+Tip blocks are perfect for highlighting important information in blog posts:
+
+```markdown
+:::tip
+💡 **Author's Note:** This article requires basic knowledge of HTML and CSS.
+:::
+
+Your content...
+
+:::important
+⭐ Pay attention to this key concept as it will appear throughout the article.
+:::
+```
+
+### In Documentation
+
+In technical documentation, tip blocks can clearly mark important notices:
+
+```markdown
+### Installation Steps
+
+:::info
+ℹ️ Make sure you have Node.js version ≥ 16.0.0 before installing.
+:::
+
+Installation instructions...
+
+:::warning
+⚠️ Do not use default configuration in production as it may pose security risks.
+:::
+```
+
+### In Tutorials
+
+Highlight key steps in tutorials with tip blocks:
+
+```markdown
+:::success
+✅ Congratulations! You've completed creating your first Astro component.
+:::
+
+:::example
+📖 **Example:** Here's a complete component example
+```js
+// Example code
+```
+:::
+```
 
 ---
 
