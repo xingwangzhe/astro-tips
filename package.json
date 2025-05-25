@@ -1,6 +1,6 @@
 {
   "name": "astro-tips",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "description": "🎨 Beautiful, customizable tip and notice blocks for Astro - 16 built-in styles with auto dark mode support and built-in compression",
   "license": "MIT",
   "author": "xingwangzhe",
@@ -55,5 +55,13 @@
   },
   "peerDependencies": {
     "astro": "^2.0.0 || ^3.0.0 || ^4.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xingwangzhe/astro-tips.git"
+  },
+  "homepage": "https://github.com/xingwangzhe/astro-tips",
+  "bugs": {
+    "url": "https://github.com/xingwangzhe/astro-tips/issues"
   }
 }
