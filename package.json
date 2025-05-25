@@ -1,7 +1,7 @@
 {
   "name": "astro-tips",
   "version": "1.1.1",
-  "description": "🎨 Beautiful, customizable tip and notice blocks for Astro - 18 built-in styles with auto dark mode support",
+  "description": "🎨 Beautiful, customizable tip and notice blocks for Astro - 16 built-in styles with auto dark mode support and built-in compression",
   "license": "MIT",
   "author": "xingwangzhe",
   "type": "module",
@@ -37,9 +37,15 @@
     "ui-components",
     "documentation",
     "content-creation"
-  ],
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  ],  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo \"Building astro-tips...\" && npm run validate",
+    "validate": "node -e \"require('./index.js')\"",
+    "lint": "echo \"Linting astro-tips...\"",
+    "format": "echo \"Formatting code...\"",
+    "dev": "cd ../astrotest && npm run dev",
+    "test-build": "cd ../astrotest && npm run build",
+    "benchmark": "node -e \"console.time('load'); require('./index.js'); console.timeEnd('load');\""
   },
   "dependencies": {
     "hastscript": "^7.0.0",

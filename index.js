@@ -13,6 +13,9 @@ const TIP_VARIANTS = new Set([
   'example', 'question', 'answer', 'caution'
 ]);
 
+// 页面级提示框使用跟踪
+const pageUsagTracker = new Set();
+
 function isTipVariant(variant) {
   return TIP_VARIANTS.has(variant);
 }
@@ -174,49 +177,69 @@ function isDirective(node) {
 function remarkTips(options = {}) {
   const tipsConfig = { ...defaultConfig, ...options };
   
-  return function transformer(tree, _file) {
-    visit(tree, (node, index, parent) => {
-      if (!parent || index === undefined || !isDirective(node)) {
-        return;
-      }
-      
-      // 只处理 containerDirective（:::tip:::）
-      if (node.type !== 'containerDirective') {
-        return;
-      }
-      
-      const variant = node.name;
-      if (!isTipVariant(variant)) {
-        return;
-      }
-      
-      const config = tipsConfig[variant];
-      if (!config) {
-        return;
-      }
-        // 创建提示框 HTML 结构
-      const tipBox = createTipNode(
-        'div',
-        {
-          class: `astro-tips-layout astro-tips-${variant} tips-style-${variant}`,
-          'data-type': variant
-        },
-        [
-          createTipNode(
+  return function transformer(tree, file) {
+    let hasTips = false;
+    
+    try {
+      visit(tree, (node, index, parent) => {
+        try {
+          if (!parent || index === undefined || !isDirective(node)) {
+            return;
+          }
+          
+          // 只处理 containerDirective（:::tip:::）
+          if (node.type !== 'containerDirective') {
+            return;
+          }
+          
+          const variant = node.name;
+          if (!isTipVariant(variant)) {
+            console.warn(`[astro-tips] Warning: Unknown tip variant "${variant}", skipping...`);
+            return;
+          }
+          
+          const config = tipsConfig[variant];
+          if (!config) {
+            console.warn(`[astro-tips] Warning: No configuration found for tip variant "${variant}", skipping...`);
+            return;
+          }
+          
+          hasTips = true;
+          
+          // 创建提示框 HTML 结构
+          const tipBox = createTipNode(
             'div',
-            { class: 'icon' },
-            [{ type: 'text', value: config.icon }]
-          ),
-          createTipNode(
-            'div',
-            { class: 'content' },
-            node.children
-          )
-        ]
-      );
+            {
+              class: `astro-tips-layout astro-tips-${variant} tips-style-${variant}`,
+              'data-type': variant
+            },
+            [
+              createTipNode(
+                'div',
+                { class: 'icon' },
+                [{ type: 'text', value: config.icon }]
+              ),
+              createTipNode(
+                'div',
+                { class: 'content' },
+                node.children
+              )
+            ]
+          );
+          
+          parent.children[index] = tipBox;
+        } catch (error) {
+          console.error(`[astro-tips] Error processing tip node "${node.name}":`, error.message);
+        }
+      });
       
-      parent.children[index] = tipBox;
-    });
+      // 记录这个文件使用了提示框
+      if (hasTips && file?.path) {
+        pageUsagTracker.add(file.path);
+      }
+    } catch (error) {
+      console.error('[astro-tips] Error during AST transformation:', error.message);
+    }
   };
 }
 
@@ -225,43 +248,120 @@ function astroTips(options = {}) {
     name: 'astro-tips',
     hooks: {
       'astro:config:setup': ({ updateConfig, addWatchFile, injectScript }) => {
-        // 合并默认配置和用户配置
-        const tipsConfig = { ...defaultConfig, ...options };
-        
-        // 读取基础 CSS 文件
-        const cssFilePath = resolve(__dirname, 'styles/tips.css');
-        let cssContent = fs.readFileSync(cssFilePath, 'utf8');
-        
-        // 添加文件监听，开发时CSS文件变化会触发重新构建
-        addWatchFile(cssFilePath);
-          // 动态生成每种类型的颜色变量 - 学习hexo-tips的方式
-        Object.keys(tipsConfig).forEach(type => {
-          const style = tipsConfig[type].style || {};
-          const styleRules = `
+        try {
+          // 提取配置选项
+          const {
+            minifyCSS = true,
+            minifyJS = true,
+            ...tipTypes
+          } = options;
+          
+          // 验证配置选项
+          if (typeof minifyCSS !== 'boolean') {
+            console.warn('[astro-tips] Warning: minifyCSS should be a boolean, using default value (true)');
+          }
+          if (typeof minifyJS !== 'boolean') {
+            console.warn('[astro-tips] Warning: minifyJS should be a boolean, using default value (true)');
+          }
+          
+          // 最终的提示框类型配置
+          const finalTipsConfig = { ...defaultConfig, ...tipTypes };
+          
+          // 验证自定义提示框类型
+          Object.keys(tipTypes).forEach(typeName => {
+            if (!tipTypes[typeName] || typeof tipTypes[typeName] !== 'object') {
+              console.warn(`[astro-tips] Warning: Invalid configuration for tip type "${typeName}", skipping...`);
+              delete finalTipsConfig[typeName];
+              return;
+            }
+            
+            const config = tipTypes[typeName];
+            if (!config.icon || typeof config.icon !== 'string') {
+              console.warn(`[astro-tips] Warning: Tip type "${typeName}" is missing a valid icon, using default`);
+              finalTipsConfig[typeName].icon = '💡';
+            }
+          });
+            // 添加 CSS 文件监听
+          const cssFilePath = resolve(__dirname, 'styles/tips.css');
+          addWatchFile(cssFilePath);
+          
+          // 读取基础 CSS 文件
+          let baseCss = '';
+          try {
+            baseCss = fs.readFileSync(cssFilePath, 'utf8');
+          } catch (error) {
+            console.error('[astro-tips] Error: Failed to read CSS file:', error.message);
+            // 使用最小CSS作为后备
+            baseCss = `
+.astro-tips-layout {
+  margin: 0.5rem 0;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid;
+  border-left-width: 6px;
+  display: flex;
+  align-items: center;
+}
+.astro-tips-layout .icon { margin-right: 1rem; }
+.astro-tips-layout .content { flex: 1; }
+`;
+          }          
+          // 生成动态样式变量
+          let dynamicCss = '';
+          try {
+            Object.keys(finalTipsConfig).forEach(type => {
+              const style = finalTipsConfig[type].style || {};
+              dynamicCss += `
 .astro-tips-${type}.tips-style-${type} {
   --tips-light-bg: ${style.light?.background || '#fff'};
   --tips-dark-bg: ${style.dark?.background || '#333'};
   --tips-border: ${style.border || '#000'};
 }`;
-          cssContent += styleRules;
-        });// 最小必要性CSS注入 - 使用 head-inline 而不是 page
-        injectScript('head-inline', `
-if (!document.getElementById('astro-tips-styles')) {
-  const style = document.createElement('style');
-  style.id = 'astro-tips-styles';
-  style.textContent = \`${cssContent.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`;
-  document.head.appendChild(style);
-}`);
-        
-        // 配置 markdown 处理
-        updateConfig({
-          markdown: {
-            remarkPlugins: [
-              remarkDirective,
-              [remarkTips, tipsConfig]
-            ]
+            });
+          } catch (error) {
+            console.error('[astro-tips] Error generating dynamic CSS:', error.message);
           }
-        });
+          
+          const fullCss = baseCss + dynamicCss;
+          
+          // 利用 Astro 的内置脚本注入，Vite 会自动处理压缩
+          try {
+            injectScript('head-inline', `
+(function(){
+  if (!document.getElementById('astro-tips-styles')) {
+    const style = document.createElement('style');
+    style.id = 'astro-tips-styles';
+    style.textContent = ${JSON.stringify(fullCss)};
+    document.head.appendChild(style);
+  }
+})();`);
+          } catch (error) {
+            console.error('[astro-tips] Error injecting styles:', error.message);
+          }          
+          // 配置 markdown 处理
+          try {
+            updateConfig({
+              markdown: {
+                remarkPlugins: [
+                  remarkDirective,
+                  [remarkTips, finalTipsConfig]
+                ]
+              },
+              // 应用用户的压缩配置
+              vite: {
+                build: {
+                  cssMinify: minifyCSS, // 用户可配置的 CSS 压缩
+                  minify: minifyJS,     // 用户可配置的 JS 压缩
+                }
+              }
+            });
+          } catch (error) {
+            console.error('[astro-tips] Error updating Astro config:', error.message);
+          }
+        } catch (error) {
+          console.error('[astro-tips] Fatal error during setup:', error.message);
+          console.error('[astro-tips] Plugin will be disabled to prevent build failure');
+        }
       }
     }
   };
