@@ -22,7 +22,7 @@
   ],
   "keywords": [
     "astro",
-    "astro-integration", 
+    "astro-integration",
     "tips",
     "tip-blocks",
     "callouts",
@@ -43,7 +43,9 @@
   },
   "dependencies": {
     "hastscript": "^7.0.0",
-    "unist-util-visit": "^4.0.0"
+    "mdast-util-to-string": "^4.0.0",
+    "remark-directive": "^4.0.0",
+    "unist-util-visit": "^5.0.0"
   },
   "peerDependencies": {
     "astro": "^2.0.0 || ^3.0.0 || ^4.0.0"
