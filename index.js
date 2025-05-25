@@ -27,6 +27,32 @@ function minifyCSS(css) {
     .trim();
 }
 
+/**
+ * 简单的JavaScript压缩函数 - 移除不必要的空白和注释
+ * @param {string} js - 要压缩的JavaScript字符串
+ * @returns {string} 压缩后的JavaScript
+ */
+function minifyJS(js) {
+  return js
+    // 移除单行注释（但保留在字符串中的）
+    .replace(/\/\/.*$/gm, '')
+    // 移除多行注释
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    // 移除多余的空白字符
+    .replace(/\s+/g, ' ')
+    // 移除不必要的空格
+    .replace(/\s*{\s*/g, '{')
+    .replace(/\s*}\s*/g, '}')
+    .replace(/\s*;\s*/g, ';')
+    .replace(/\s*=\s*/g, '=')
+    .replace(/\s*\(\s*/g, '(')
+    .replace(/\s*\)\s*/g, ')')
+    .replace(/\s*,\s*/g, ',')
+    .replace(/\s*\.\s*/g, '.')
+    // 移除开头和结尾的空白
+    .trim();
+}
+
 // 支持的 tip 类型
 const TIP_VARIANTS = new Set([
   'warning', 'danger', 'tip', 'mention', 'recommend', 'note', 
@@ -261,19 +287,23 @@ export default function (options = {}) {
 }`;
           cssContent += styleRules;
         });
-        
-        // 压缩CSS内容以优化性能
+          // 压缩CSS内容以优化性能
         const minifiedCSS = minifyCSS(cssContent);
         
-        // 使用 injectScript 在页面头部注入样式
-        injectScript('head-inline', `
+        // 创建并压缩JavaScript注入代码
+        const injectJS = `
           if (!document.getElementById('astro-tips-styles')) {
             const style = document.createElement('style');
             style.id = 'astro-tips-styles';
             style.textContent = \`${minifiedCSS.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`;
             document.head.appendChild(style);
           }
-        `);
+        `;
+        
+        const minifiedJS = minifyJS(injectJS);
+        
+        // 使用 injectScript 在页面头部注入压缩后的样式
+        injectScript('head-inline', minifiedJS);
         
         // 配置 markdown 处理 - 使用 remarkDirective 和我们的插件
         updateConfig({
