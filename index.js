@@ -164,13 +164,9 @@ const defaultConfig = {
   }
 };
 
-// 检查一个节点是否是指令
+// 检查一个节点是否是指令 - 只允许容器指令（:::语法）
 function isDirective(node) {
-  return (
-    node.type === 'textDirective' ||
-    node.type === 'leafDirective' ||
-    node.type === 'containerDirective'
-  );
+  return node.type === 'containerDirective';
 }
 
 // 基于 AST 的 remark 插件处理提示框语法
