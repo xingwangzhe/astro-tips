@@ -277,10 +277,9 @@ function astroTips(options = {}) {
               finalTipsConfig[typeName].icon = '💡';
             }
           });
-            // 添加 CSS 文件监听
+          // 添加 CSS 文件监听
           const cssFilePath = resolve(__dirname, 'styles/tips.css');
           addWatchFile(cssFilePath);
-          
           // 读取基础 CSS 文件
           let baseCss = '';
           try {
@@ -301,26 +300,19 @@ function astroTips(options = {}) {
 .astro-tips-layout .icon { margin-right: 1rem; }
 .astro-tips-layout .content { flex: 1; }
 `;
-          }          
+          }
           // 生成动态样式变量
           let dynamicCss = '';
           try {
             Object.keys(finalTipsConfig).forEach(type => {
               const style = finalTipsConfig[type].style || {};
-              dynamicCss += `
-.astro-tips-${type}.tips-style-${type} {
-  --tips-light-bg: ${style.light?.background || '#fff'};
-  --tips-dark-bg: ${style.dark?.background || '#333'};
-  --tips-border: ${style.border || '#000'};
-}`;
+              dynamicCss += `\n.astro-tips-${type}.tips-style-${type} {\n  --tips-light-bg: ${style.light?.background || '#fff'};\n  --tips-dark-bg: ${style.dark?.background || '#333'};\n  --tips-border: ${style.border || '#000'};\n}`;
             });
           } catch (error) {
             console.error('[astro-tips] Error generating dynamic CSS:', error.message);
           }
-          
           const fullCss = baseCss + dynamicCss;
-          
-          // 利用 Astro 的内置脚本注入，Vite 会自动处理压缩
+          // 注入动态CSS到页面head
           try {
             injectScript('head-inline', `
 (function(){
@@ -333,7 +325,7 @@ function astroTips(options = {}) {
 })();`);
           } catch (error) {
             console.error('[astro-tips] Error injecting styles:', error.message);
-          }          
+          }
           // 配置 markdown 处理
           try {
             updateConfig({
@@ -343,11 +335,10 @@ function astroTips(options = {}) {
                   [remarkTips, finalTipsConfig]
                 ]
               },
-              // 应用用户的压缩配置
               vite: {
                 build: {
-                  cssMinify: minifyCSS, // 用户可配置的 CSS 压缩
-                  minify: minifyJS,     // 用户可配置的 JS 压缩
+                  cssMinify: minifyCSS,
+                  minify: minifyJS,
                 }
               }
             });
