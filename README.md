@@ -49,6 +49,9 @@ dist/                 # 编译输出目录
 选择你喜欢的包管理器：
 
 ```bash
+# 使用 bun (推荐)
+bun add astro-tips
+
 # 使用 npm
 npm install astro-tips
 
@@ -57,9 +60,6 @@ yarn add astro-tips
 
 # 使用 pnpm
 pnpm add astro-tips
-
-# 使用 bun
-bun add astro-tips
 ```
 
 ## ⚙️ 配置设置

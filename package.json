@@ -43,11 +43,12 @@
     "validate": "node -e \"require('./dist/index.js')\"",
     "lint": "echo \"Linting astro-tips...\"",
     "format": "echo \"Formatting code...\"",
-    "dev": "cd ../astrotest && npm run dev",
-    "test-build": "cd ../astrotest && npm run build",
+    "dev": "cd ../astrotest && bun run dev",
+    "test-build": "cd ../astrotest && bun run build",
     "benchmark": "node -e \"console.time('load'); require('./dist/index.js'); console.timeEnd('load');\""
   },
   "dependencies": {
+    "cheerio": "^1.1.2",
     "hastscript": "^7.0.0",
     "mdast-util-to-string": "^4.0.0",
     "remark-directive": "^4.0.0",

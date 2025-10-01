@@ -17,6 +17,9 @@
 Choose your favorite package manager:
 
 ```bash
+# Using bun (recommended)
+bun add astro-tips
+
 # Using npm
 npm install astro-tips
 
@@ -25,9 +28,6 @@ yarn add astro-tips
 
 # Using pnpm
 pnpm add astro-tips
-
-# Using bun
-bun add astro-tips
 ```
 
 ## ⚙️ Configuration Setup

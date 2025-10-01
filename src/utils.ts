@@ -1,5 +1,5 @@
-import type { Text } from "hast";
 import { TIP_VARIANTS } from "./config.js";
+import { SHARED_STYLES } from "./styles.js";
 
 export function isTipVariant(variant: string): boolean {
   return TIP_VARIANTS.has(variant);
@@ -34,90 +34,43 @@ export function generateCompleteStyle(style: {
   const darkBg = style.dark?.background || "#333";
   const borderColor = style.border || "#000";
 
-  // 使用CSS-in-JS的方式，包含媒体查询
-  return `
-    --tips-light-bg: ${lightBg};
-    --tips-dark-bg: ${darkBg};
-    --tips-border: ${borderColor};
-    margin: 0.5rem 0;
-    padding: 0.5rem 1.5rem;
-    border-radius: 8px;
-    border: 1px solid var(--tips-border);
-    border-left-width: 6px;
-    display: flex;
-    align-items: center;
-    transition: transform 0.3s ease;
-    min-width: 2rem;
-    height: auto;
-    overflow-x: auto;
-    overflow-y: hidden;
-    background-color: var(--tips-light-bg);
-  `.trim();
+  // 生成CSS变量并压缩空格
+  return `--tips-light-bg:${lightBg};--tips-dark-bg:${darkBg};--tips-border:${borderColor};${SHARED_STYLES.base
+    .replace(/\s+/g, " ")
+    .trim()}`
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-// 创建提示框 HTML 结构（完全内联样式）
+// 提取文本内容
+function extractTextContent(children: any[]): string {
+  let content = "";
+  for (const child of children) {
+    if (child.type === "text") {
+      content += child.value;
+    } else if (child.type === "paragraph" && child.children) {
+      content += "<p>";
+      content += extractTextContent(child.children);
+      content += "</p>";
+    } else if (child.children) {
+      content += extractTextContent(child.children);
+    }
+  }
+  return content;
+}
+
+// 创建提示框的HTML字符串（直接返回HTML，不使用转义）
 export function createTipBox(
   variant: string,
   config: { icon: string; style?: any },
   children: any[]
-) {
+): string {
   const completeStyle = generateCompleteStyle(config.style || {});
+  const iconStyle = SHARED_STYLES.icon.replace(/\s+/g, " ").trim();
+  const contentStyle = SHARED_STYLES.content.replace(/\s+/g, " ").trim();
 
-  return createTipNode(
-    "div",
-    {
-      "data-type": variant,
-      style: completeStyle,
-    },
-    [
-      createTipNode(
-        "div",
-        {
-          style: `
-          margin-top: 5px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin-right: 1rem;
-          font-size: clamp(2em, 2vw, 3em);
-          min-width: 2rem;
-          scale: 1.5;
-          transition: transform 0.3s ease;
-          color: var(--tips-border);
-        `.trim(),
-        },
-        [{ type: "text", value: config.icon } as Text]
-      ),
-      createTipNode(
-        "div",
-        {
-          style: `
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          transition: transform 0.3s ease;
-          line-height: 1.6;
-        `.trim(),
-        },
-        children
-      ),
-      // 添加一个style标签来处理暗色主题媒体查询
-      createTipNode("style", {}, [
-        {
-          type: "text",
-          value: `
-            @media (prefers-color-scheme: dark) {
-              [data-type="${variant}"] {
-                background-color: var(--tips-dark-bg) !important;
-              }
-            }
-            html.dark [data-type="${variant}"] {
-              background-color: var(--tips-dark-bg) !important;
-            }
-          `,
-        },
-      ]),
-    ]
-  );
+  const content = extractTextContent(children);
+
+  // 直接返回HTML字符串，不使用任何转义
+  return `<div data-type="${variant}" class="astro-tips-${variant}" style="${completeStyle}"><div class="astro-tips-icon" style="${iconStyle}">${config.icon}</div><div class="astro-tips-content" style="${contentStyle}">${content}</div></div>`;
 }
