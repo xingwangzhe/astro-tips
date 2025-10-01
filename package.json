@@ -5,19 +5,17 @@
   "license": "MIT",
   "author": "xingwangzhe",
   "type": "module",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "default": "./index.js"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./styles": "./styles/tips.css"
   },
   "files": [
-    "index.js",
-    "index.d.ts",
-    "src",
+    "dist",
     "styles"
   ],
   "keywords": [
@@ -40,15 +38,16 @@
     "content-creation",
     "remark",
     "remark-plugin"
-  ],  "scripts": {
+  ],
+  "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "echo \"Building astro-tips...\" && npm run validate",
-    "validate": "node -e \"require('./index.js')\"",
+    "validate": "node -e \"require('./dist/index.js')\"",
     "lint": "echo \"Linting astro-tips...\"",
     "format": "echo \"Formatting code...\"",
     "dev": "cd ../astrotest && npm run dev",
     "test-build": "cd ../astrotest && npm run build",
-    "benchmark": "node -e \"console.time('load'); require('./index.js'); console.timeEnd('load');\""
+    "benchmark": "node -e \"console.time('load'); require('./dist/index.js'); console.timeEnd('load');\""
   },
   "dependencies": {
     "hastscript": "^7.0.0",
@@ -69,5 +68,9 @@
   },
   "engines": {
     "node": ">=18.14.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.1",
+    "typescript": "^5.9.3"
   }
 }
