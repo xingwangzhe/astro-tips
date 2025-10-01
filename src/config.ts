@@ -18,6 +18,21 @@ export const TIP_VARIANTS = new Set([
   "question",
   "answer",
   "caution",
+  "todo",
+  "feature",
+  "deprecated",
+  "breaking",
+  "security",
+  "performance",
+  "accessibility",
+  "experimental",
+  "beta",
+  "new",
+  "ai",
+  "bot",
+  "chat",
+  "assistant",
+  "automation",
 ]);
 
 // 页面级提示框使用跟踪
@@ -151,6 +166,126 @@ export const defaultConfig: AstroTipsConfig = {
       border: "#ff9800",
       light: { background: "#fff3e0" },
       dark: { background: "#3d311f" },
+    },
+  },
+  todo: {
+    icon: "📋",
+    style: {
+      border: "#9c27b0",
+      light: { background: "#f3e5f5" },
+      dark: { background: "#2d1f3d" },
+    },
+  },
+  feature: {
+    icon: "✨",
+    style: {
+      border: "#00bcd4",
+      light: { background: "#e0f7fa" },
+      dark: { background: "#1f353d" },
+    },
+  },
+  deprecated: {
+    icon: "🚫",
+    style: {
+      border: "#795548",
+      light: { background: "#efebe9" },
+      dark: { background: "#2d2620" },
+    },
+  },
+  breaking: {
+    icon: "💥",
+    style: {
+      border: "#d32f2f",
+      light: { background: "#ffcdd2" },
+      dark: { background: "#3d1f1f" },
+    },
+  },
+  security: {
+    icon: "🔒",
+    style: {
+      border: "#ff6f00",
+      light: { background: "#fff3e0" },
+      dark: { background: "#3d2f1f" },
+    },
+  },
+  performance: {
+    icon: "⚡",
+    style: {
+      border: "#ffc107",
+      light: { background: "#fffde7" },
+      dark: { background: "#3d3b1f" },
+    },
+  },
+  accessibility: {
+    icon: "♿",
+    style: {
+      border: "#3f51b5",
+      light: { background: "#e8eaf6" },
+      dark: { background: "#1f2537" },
+    },
+  },
+  experimental: {
+    icon: "🧪",
+    style: {
+      border: "#e91e63",
+      light: { background: "#fce4ec" },
+      dark: { background: "#3d1f2a" },
+    },
+  },
+  beta: {
+    icon: "🎯",
+    style: {
+      border: "#673ab7",
+      light: { background: "#ede7f6" },
+      dark: { background: "#27203d" },
+    },
+  },
+  new: {
+    icon: "🎉",
+    style: {
+      border: "#ff4081",
+      light: { background: "#fce4ec" },
+      dark: { background: "#3d1f2a" },
+    },
+  },
+  ai: {
+    icon: "🤖",
+    style: {
+      border: "#00acc1",
+      light: { background: "#e0f7fa" },
+      dark: { background: "#1f353d" },
+    },
+  },
+  bot: {
+    icon: "🤖",
+    style: {
+      border: "#3949ab",
+      light: { background: "#e8eaf6" },
+      dark: { background: "#1f2537" },
+    },
+  },
+  chat: {
+    icon: "💬",
+    style: {
+      border: "#7b1fa2",
+      light: { background: "#f3e5f5" },
+      dark: { background: "#2d1f3d" },
+    },
+  },
+  assistant: {
+    icon: "👨‍💼",
+    style: {
+      border: "#f57c00",
+      light: { background: "#fff3e0" },
+      dark: { background: "#3d311f" },
+    },
+  },
+  automation: {
+    icon: "⚙️",
+    style: {
+      border: "#546e7a",
+      light: { background: "#eceff1" },
+      dark: { background: "#1f292d" },
     },
   },
 };

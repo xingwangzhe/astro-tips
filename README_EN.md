@@ -3,11 +3,11 @@
 
 > 🌟 Beautiful tip blocks for the Astro ecosystem
 
-**Make your content more engaging!** `astro-tips` is an easy-to-use Astro integration that creates 16 beautiful tip blocks in Markdown and MDX files with just a few lines of code.
+**Make your content more engaging!** `astro-tips` is an easy-to-use Astro integration that creates 31 beautiful tip blocks in Markdown and MDX files with just a few lines of code.
 
 ✨ **Key Features**
 - 🚀 Zero configuration, works out of the box
-- 🎨 16 built-in tip block types covering all use cases
+- 🎨 31 built-in tip block types covering all use cases
 - 🌙 Auto light/dark theme adaptation
 - 📝 Full Markdown syntax compatibility
 - ✨ Simple and intuitive usage
@@ -106,15 +106,27 @@ You can write anything here:
 console.log('Hello, Astro Tips!');
 ```
 :::
+
+:::ai
+🤖 **AI Assistant:** This is an AI-related tip block for machine learning content.
+:::
+
+:::todo
+📋 **Todo:** Remember to complete this important task.
+:::
+
+:::security
+🔒 **Security Note:** Make sure your passwords are complex enough.
+:::
 ````
 
 **Rendered Result:**
 
 ![Tip Block Example](show.webp)
 
-## 🎨 16 Built-in Styles
+## 🎨 31 Built-in Styles
 
-We've carefully designed 16 tip blocks to meet various use cases:
+We've carefully designed 31 tip blocks to meet various use cases:
 
 ### 📝 Basic Types
 - `tip` 💡 - Practical tips and advice
@@ -133,12 +145,35 @@ We've carefully designed 16 tip blocks to meet various use cases:
 - `important` ⭐ - Important emphasis
 - `example` 🔍 - Examples and demonstrations
 - `question` ❓ - Questions
+- `answer` ✨ - Question answers
 
 ### 🎯 Other Types
-- `answer` ✨ - Question answers
 - `quote` 💭 - Quoted content
 - `mention` 💬 - Special mentions
 - `bug` 🐛 - Bug related tips
+
+### 📋 Project Management
+- `todo` 📋 - Todo items
+- `feature` ✨ - New features
+- `deprecated` 🚫 - Deprecated features
+- `breaking` 💥 - Breaking changes
+
+### 🔒 Technical Topics
+- `security` 🔒 - Security tips
+- `performance` ⚡ - Performance optimization
+- `accessibility` ♿ - Accessibility
+- `experimental` 🧪 - Experimental features
+
+### 🎉 Version Related
+- `beta` 🎯 - Beta versions
+- `new` 🎉 - New content
+
+### 🤖 AI & Automation
+- `ai` 🤖 - AI related content
+- `bot` 🤖 - Bots/automation tools
+- `chat` 💬 - Chat conversations
+- `assistant` 👨‍💼 - Assistant tips
+- `automation` ⚙️ - Automation processes
 
 ## ✨ Smart Theme Adaptation
 
