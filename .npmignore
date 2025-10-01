@@ -1,1 +1,40 @@
+# Source files
+index.ts
+index.d.ts
+
+# Build configuration
+tsconfig.json
+
+# Dependencies
+node_modules/
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 bun.lock
+
+# Build cache and temp files
+.astro/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Test files (if any)
+test/
+tests/
+*.test.js
+*.test.ts
+
+# Documentation source (keep README.md)
+*.md
+!README.md
+!README_EN.md

@@ -7,6 +7,9 @@ node_modules/
 dist/
 .astro/
 
+# TypeScript build info
+*.tsbuildinfo
+
 # Logs
 *.log
 npm-debug.log*
@@ -30,3 +33,8 @@ bun.lock
 *.njsproj
 *.sln
 *.sw?
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
