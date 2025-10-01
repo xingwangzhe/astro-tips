@@ -65,27 +65,13 @@ html[class~="dark"] [data-type="${variant}"] .astro-tips-icon,
 }
 
 function astroTips(options: AstroTipsOptions = {}): AstroIntegration {
-  console.log("[astro-tips] Plugin initialized with options:", options);
   return {
     name: "astro-tips",
     hooks: {
       "astro:config:setup": ({ updateConfig }) => {
-        console.log("[astro-tips] astro:config:setup hook called");
         try {
           // 提取配置选项
           const { minifyCSS = true, minifyJS = true, ...tipTypes } = options;
-
-          // 验证配置选项
-          if (typeof minifyCSS !== "boolean") {
-            console.warn(
-              "[astro-tips] Warning: minifyCSS should be a boolean, using default value (true)"
-            );
-          }
-          if (typeof minifyJS !== "boolean") {
-            console.warn(
-              "[astro-tips] Warning: minifyJS should be a boolean, using default value (true)"
-            );
-          }
 
           // 最终的提示框类型配置
           const finalTipsConfig: AstroTipsConfig = { ...defaultConfig };
@@ -103,6 +89,18 @@ function astroTips(options: AstroTipsOptions = {}): AstroIntegration {
           });
 
           try {
+            // 生成主题CSS
+            const themeCSS = generateThemeCSS();
+
+            // 使用 injectScript 在页面中注入样式
+            const styleInjectionScript = `
+if (typeof document !== 'undefined' && !document.querySelector('[data-astro-tips="theme"]')) {
+  const style = document.createElement('style');
+  style.setAttribute('data-astro-tips', 'theme');
+  style.textContent = ${JSON.stringify(themeCSS)};
+  document.head.appendChild(style);
+}`;
+
             updateConfig({
               markdown: {
                 remarkPlugins: [remarkDirective, [remarkTips, finalTipsConfig]],
@@ -114,56 +112,45 @@ function astroTips(options: AstroTipsOptions = {}): AstroIntegration {
                 },
               },
             });
-          } catch (error) {
-            console.error(
-              "[astro-tips] Error updating Astro config:",
-              (error as Error).message
-            );
+
+            // 注入客户端脚本来添加样式
+            (updateConfig as any)({
+              integrations: [
+                {
+                  name: "astro-tips-style-injector",
+                  hooks: {
+                    "astro:config:setup": ({ injectScript }: any) => {
+                      injectScript("page", styleInjectionScript);
+                    },
+                  },
+                },
+              ],
+            });
+          } catch {
+            // Silent error handling
           }
-        } catch (error) {
-          console.error(
-            "[astro-tips] Fatal error during setup:",
-            (error as Error).message
-          );
-          console.error(
-            "[astro-tips] Plugin will be disabled to prevent build failure"
-          );
+        } catch {
+          // Silent error handling
         }
       },
       "astro:build:generated": ({ dir }) => {
-        console.log(
-          "[astro-tips] astro:build:generated hook called, dir:",
-          dir
-        );
         try {
           const themeCSS = generateThemeCSS();
           const styleTag = `<style data-astro-tips="theme">${themeCSS}</style>`;
 
           // 将URL转换为文件系统路径
           const buildDir = fileURLToPath(dir);
-          console.log("[astro-tips] Build directory:", buildDir);
 
           function processDirectory(directory: string) {
-            console.log(`[astro-tips] Processing directory: ${directory}`);
             const files = readdirSync(directory);
-            console.log(
-              `[astro-tips] Found ${files.length} items in directory`
-            );
             for (const file of files) {
               const filePath = join(directory, file);
               const stat = statSync(filePath);
 
               if (stat.isDirectory()) {
-                console.log(
-                  `[astro-tips] Recursing into directory: ${filePath}`
-                );
                 processDirectory(filePath);
               } else if (file.endsWith(".html")) {
-                console.log(`[astro-tips] Processing HTML file: ${filePath}`);
                 let content = readFileSync(filePath, "utf-8");
-                console.log(
-                  `[astro-tips] File content length: ${content.length}`
-                );
                 if (!content.includes('data-astro-tips="theme"')) {
                   const newContent = content.replace(
                     "</head>",
@@ -171,30 +158,15 @@ function astroTips(options: AstroTipsOptions = {}): AstroIntegration {
                   );
                   if (newContent !== content) {
                     writeFileSync(filePath, newContent);
-                    console.log(
-                      `[astro-tips] Successfully injected theme CSS into: ${filePath}`
-                    );
-                  } else {
-                    console.log(
-                      `[astro-tips] Failed to find </head> tag in: ${filePath}`
-                    );
                   }
-                } else {
-                  console.log(
-                    `[astro-tips] Theme CSS already present in: ${filePath}`
-                  );
                 }
               }
             }
           }
 
           processDirectory(buildDir);
-        } catch (error) {
-          console.error(
-            "[astro-tips] Error in build:generated hook:",
-            (error as Error).message
-          );
-          console.error("[astro-tips] Stack trace:", (error as Error).stack);
+        } catch {
+          // Silent error handling
         }
       },
     },
