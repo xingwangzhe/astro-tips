@@ -38,3 +38,19 @@ bun.lock
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Test coverage and reports
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Local development files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
