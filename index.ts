@@ -11,15 +11,17 @@ import type {
 import { defaultConfig } from "./src/config.js";
 import { remarkTips } from "./src/remark-plugin.js";
 
-// 生成暗色主题CSS
-function generateDarkThemeCSS(): string {
+// 生成暗色主题CSS和hover效果
+function generateThemeCSS(): string {
   const variants = Object.keys(defaultConfig);
-  return variants
+  const darkThemeCSS = variants
     .map((variant) => {
       const config = defaultConfig[variant];
       const style = config.style || {};
       const darkBg = style.dark?.background || "#333";
       const borderColor = style.border || "#000";
+
+      // 同时支持系统暗色模式和手动切换的暗色模式
       return `
 @media (prefers-color-scheme: dark) {
   [data-type="${variant}"] {
@@ -30,15 +32,36 @@ function generateDarkThemeCSS(): string {
     color: ${borderColor} !important;
   }
 }
-html.dark [data-type="${variant}"] {
+html.dark [data-type="${variant}"],
+html[class~="dark"] [data-type="${variant}"],
+.dark [data-type="${variant}"] {
   background-color: ${darkBg} !important;
   border-color: ${borderColor} !important;
 }
-html.dark [data-type="${variant}"] .astro-tips-icon {
+html.dark [data-type="${variant}"] .astro-tips-icon,
+html[class~="dark"] [data-type="${variant}"] .astro-tips-icon,
+.dark [data-type="${variant}"] .astro-tips-icon {
   color: ${borderColor} !important;
 }`;
     })
     .join("\n");
+
+  // 添加hover效果CSS - 灵动效果
+  const hoverCSS = `
+/* 灵动 hover 效果 */
+[data-type] {
+  cursor: pointer;
+}
+[data-type]:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+[data-type]:hover .astro-tips-icon {
+  transform: scale(1.25) rotate(8deg);
+  filter: brightness(1.2);
+}`;
+
+  return darkThemeCSS + "\n" + hoverCSS;
 }
 
 function astroTips(options: AstroTipsOptions = {}): AstroIntegration {
@@ -113,8 +136,8 @@ function astroTips(options: AstroTipsOptions = {}): AstroIntegration {
           dir
         );
         try {
-          const darkThemeCSS = generateDarkThemeCSS();
-          const styleTag = `<style data-astro-tips="dark">${darkThemeCSS}</style>`;
+          const themeCSS = generateThemeCSS();
+          const styleTag = `<style data-astro-tips="theme">${themeCSS}</style>`;
 
           // 将URL转换为文件系统路径
           const buildDir = fileURLToPath(dir);
@@ -141,7 +164,7 @@ function astroTips(options: AstroTipsOptions = {}): AstroIntegration {
                 console.log(
                   `[astro-tips] File content length: ${content.length}`
                 );
-                if (!content.includes('data-astro-tips="dark"')) {
+                if (!content.includes('data-astro-tips="theme"')) {
                   const newContent = content.replace(
                     "</head>",
                     `${styleTag}</head>`
@@ -149,7 +172,7 @@ function astroTips(options: AstroTipsOptions = {}): AstroIntegration {
                   if (newContent !== content) {
                     writeFileSync(filePath, newContent);
                     console.log(
-                      `[astro-tips] Successfully injected dark theme CSS into: ${filePath}`
+                      `[astro-tips] Successfully injected theme CSS into: ${filePath}`
                     );
                   } else {
                     console.log(
@@ -158,7 +181,7 @@ function astroTips(options: AstroTipsOptions = {}): AstroIntegration {
                   }
                 } else {
                   console.log(
-                    `[astro-tips] Dark theme CSS already present in: ${filePath}`
+                    `[astro-tips] Theme CSS already present in: ${filePath}`
                   );
                 }
               }
