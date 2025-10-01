@@ -1,6 +1,6 @@
 {
   "name": "astro-tips",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "description": "🎨 Beautiful, customizable tip and notice blocks for Astro - 16 built-in styles with auto dark mode support and built-in compression",
   "license": "MIT",
   "author": "xingwangzhe",
@@ -11,12 +11,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "./styles": "./styles/tips.css"
+    }
   },
   "files": [
-    "dist",
-    "styles"
+    "dist"
   ],
   "keywords": [
     "astro",
